@@ -1,9 +1,9 @@
 import enum
 
 class Difficulty(str, enum.Enum):
-	EASY = "EASY",
-	MEDIUM = "MEDIUM",
-	HARD = "HARD"
+	easy = "EASY",
+	medium = "MEDIUM",
+	hard = "HARD"
 
 class Category:
 	def __init__(self, name):
@@ -15,15 +15,16 @@ class Player:
 		self.statistics = None
 
 class Question:
-	def __init__(self, **kargs):
-		self.question = kargs.get("question", "")
-		self.answers = kargs.get("answers", [])
-		self.correct_answer = kargs.get("correct_answer", "")
+	def __init__(self, **attr):
+		self.question = attr.get("question", "")
+		self.answers = attr.get("answers", [])
+		self.correct_answer = attr.get("correct_answer", "")
 		self.is_correct = False
 
 class Match:
-	def __init__(self, questions):
+	def __init__(self, questions, category, difficulty = Difficulty.medium):
 		self.duration = 0
 		self.score = 0
-		self.difficulty = Difficulty.MEDIUM
+		self.difficulty = difficulty
+		self.category = category
 		self.questions = questions
