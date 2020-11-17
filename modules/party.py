@@ -17,6 +17,7 @@ class TriviaParty(IParty):
 
 	def __get_category_api_id(self):
 		return {
+			"General Knowledge":"9",		# General Knowledge
 			"Books":			"10",		# Entertainment: Books
 			"Film":				"11",		# Entertainment: Film
 			"Music":			"12",		# Entertainment: Music
