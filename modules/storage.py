@@ -1,6 +1,6 @@
 import abc
 import mysql.connector
-from trivia import Player
+from trivia import Player, Category, PlayerStatistics
 
 class IStorage(metaclass=abc.ABCMeta):
 	@abc.abstractmethod
@@ -13,6 +13,14 @@ class IStorage(metaclass=abc.ABCMeta):
 
 	@abc.abstractmethod
 	def load_players(self):
+		pass
+
+	@abc.abstractmethod
+	def load_categories(self):
+		pass
+
+	@abc.abstractmethod
+	def load_player_statistics(self, player):
 		pass
 
 
@@ -113,3 +121,56 @@ class MyStorage(IStorage):
 
 		# return players from DB
 		return [Player(p[0], p[1]) for p in players]
+
+	def load_categories(self):
+		categories = self.__select(
+			"SELECT name, id FROM categories"
+		)
+
+		# return categories from DB
+		return [Category(c[0], c[1]) for c in categories]
+
+	def load_player_statistics(self, player):
+		if player == None:
+			return None
+		
+		s = PlayerStatistics()
+
+		s.wins					= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s AND score >= 7", (player.id,), True)
+		s.games_played			= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s", (player.id,), True)
+		s.time_played			= self.__select("SELECT SUM(duration) FROM matches WHERE id_player = %s", (player.id,), True)
+		s.ranking				= self.__select(
+			"""
+			SELECT @rankpos FROM
+			(
+				SELECT @rankpos := 0
+			) AS rk,
+			(
+				SELECT p.id FROM players p
+				INNER JOIN matches m ON p.id = m.id_player
+				ORDER BY m.score DESC
+			) AS p
+			WHERE (@rankpos := @rankpos + 1) AND p.id = %s
+			LIMIT 1
+			""",
+			(player.id,)
+			True
+		) or -1
+		s.best_categories		= self.__select(
+			"""
+			SELECT
+				cat.id,
+				cat.`name`,
+				SUM(score) AS tscore
+			FROM matches m
+			INNER JOIN categories cat ON m.id_category = cat.id AND id_player = %s
+			GROUP BY id_category
+			ORDER BY tscore DESC
+			""",
+			(player.id,)
+		)
+
+		# convert categories data into Category objects
+		s.best_categories = [Category(c[1], c[0]) for c in s.best_categories]
+
+		return s
