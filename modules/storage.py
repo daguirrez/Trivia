@@ -96,6 +96,9 @@ class MyStorage(IStorage):
 		)
 
 	def save_match(self, match):
+		if match == None or match.player == None:
+			return False
+
 		return self.__insert(
 			"""
 			INSERT INTO matches (
@@ -116,15 +119,22 @@ class MyStorage(IStorage):
 
 	def load_players(self):
 		players = self.__select(
-			"SELECT name, id FROM players"
+			"""SELECT
+				p.id,
+				p.`name`,
+				SUM(m.score) AS tscore
+			FROM players p
+			LEFT JOIN matches m ON m.id_player = p.id
+			GROUP BY p.id
+			ORDER BY tscore DESC"""
 		)
 
-		# return players from DB
-		return [Player(p[0], p[1]) for p in players]
+		# return players from DB ranked by the best
+		return [Player(p[1], p[0]) for p in players]
 
 	def load_categories(self):
 		categories = self.__select(
-			"SELECT name, id FROM categories"
+			"SELECT `name`, id FROM categories"
 		)
 
 		# return categories from DB
@@ -153,7 +163,7 @@ class MyStorage(IStorage):
 			WHERE (@rankpos := @rankpos + 1) AND p.id = %s
 			LIMIT 1
 			""",
-			(player.id,)
+			(player.id,),
 			True
 		) or -1
 		s.best_categories		= self.__select(
