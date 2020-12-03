@@ -51,6 +51,10 @@ class MenuScreen(IScreen):
 		return menu
 
 class CategoriesScreen(IScreen):
+	def __init__(self, categories):
+		self.__categories = categories
+
+
 	def draw(self):
 		categories = '''
 		Select the category of your trivia. if you 
