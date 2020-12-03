@@ -30,6 +30,12 @@ class Question:
 		self.answers = attr.get("answers", [])
 		self.correct_answer = attr.get("correct_answer", "")
 		self.is_correct = False
+	
+	#def get_question(self):
+	#	return str(self.question)
+	
+	#def get_answers(self):
+	#	return str(self.answers)
 
 class Match:
 	def __init__(self, questions, category, difficulty = Difficulty.medium):

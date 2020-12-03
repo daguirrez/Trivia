@@ -1,4 +1,6 @@
 import abc
+from trivia import Category, Match
+from storage import MyStorage
 
 class IScreen(metaclass=abc.ABCMeta):
 	@abc.abstractmethod
@@ -50,6 +52,18 @@ class MenuScreen(IScreen):
 		View player stats(writes 2)'''
 		return menu
 
+class PlayerStatsScreen(IScreen):
+	def __init__(self, player, mystorage):
+		self.__player = player
+		self.__mystorage = mystorage
+	
+	def draw(self):
+		stats = f'''
+		Yout stats are:
+
+		{self.__mystorage.load_player_statistics(self.__player)}''' 
+		return stats
+
 class CategoriesScreen(IScreen):
 	def __init__(self, category):
 		self.__category = category
@@ -76,10 +90,10 @@ class GameScreen(IScreen):
 		Read the question and select the answer you 
 		think is right.
 
-		Question: {self.__match.questions[self.__match.index].question}
+		Question: {self.__match.questions[self.__match.index].get_question()}
 					
 		Possible answers:
-		{self.__match.questions[self.__match.index].answers}'''
+		{self.__match.questions[self.__match.index].get_answers()}'''
 		return qa
 
 class FinalScreen(IScreen):
