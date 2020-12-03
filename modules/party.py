@@ -57,5 +57,3 @@ class TriviaParty(IParty):
 			random.shuffle(q.answers)
 
 		return Match(questions, self.__category, self.__difficulty)
-
-

@@ -46,49 +46,49 @@ class MenuScreen(IScreen):
 		currently.
 
 		Menu:
-		Play match (writes "to define")
-		View player stats(writes "to define")'''
+		Play match (writes 1)
+		View player stats(writes 2)'''
 		return menu
 
 class CategoriesScreen(IScreen):
-	def __init__(self, categories):
-		self.__categories = categories
-
+	def __init__(self, category):
+		self.__category = category
 
 	def draw(self):
-		categories = '''
+		categoriesstr = '''
 		Select the category of your trivia. if you 
 		don't select any of the default category is 
-		Anime & Manga.
+		Anime & Manga. (Introduce the id)
 
 		Categories:
-		General Knowledge:	writes 9		
-		Books:				writes 10
-		Films:				writes 11		
-		Music:				writes 12		
-		Video Games:		writes 15		
-		Celebrities:		writes 26
-		Animals:			writes 27
-		Comics:				writes 29	
-		Anime & Manga:		writes 31		
-		Cartoon:			writes 32'''
-		return categories
+
+		{for q in self.__category:
+			q.name + " writes " + q.__id}'''
+		return categoriesstr
 
 
 class GameScreen(IScreen):
-	def draw(self, questions):
+	def __init__(self, match):
+		self.__match = match
+
+	def draw(self):
 		qa = f'''
 		Read the question and select the answer you 
 		think is right.
 
-		Question: {questions["question"]}
-			
+		Question: {self.__match.questions[self.__match.index].question}
+					
 		Possible answers:
-		{questions["results"]}'''
+		{self.__match.questions[self.__match.index].answers}'''
 		return qa
 
 class FinalScreen(IScreen):
-	def draw(self, result):
+	def __init__(self, match):
+		self.__match = match
+
+	def draw(self):
+		result = len([q for q in self.__match.questions if q.is_correct])
+		
 		final1 = '''
 		Results:
 
@@ -97,11 +97,7 @@ class FinalScreen(IScreen):
 		║╔╣╩╣╔╣╔╣╩╣═╣╔╣
 		╚╝╚═╩╝╚╝╚═╩═╩═╝
 
-		You answered all the questions correctly.
-
-		Do you want to go out or go back to the menu?
-		- Enter "" if you want to go back to the menu.
-		- Enter "" if you want to exit the game.'''
+		You answered all the questions correctly.'''
 
 		final2 = '''
 		Results:
@@ -112,11 +108,7 @@ class FinalScreen(IScreen):
 		╚╩═╩╩═╩═╝╚═╩╝╠╗║
 		─────────────╚═╝
 
-		You answered 7 to 9 correct questions.
-
-		Do you want to go out or go back to the menu?
-		- Enter "" if you want to go back to the menu.
-		- Enter "" if you want to exit the game.'''
+		You answered 7 to 9 correct questions.'''
 
 		final3 = '''
 		Results:
@@ -126,11 +118,7 @@ class FinalScreen(IScreen):
 		╔╩╗║╬║║║║═╣╬╚╣║║║║╬║╬║║╬║╩╣╔╣╔╣╩╣╔╝
 		╚══╩═╩═╝╚═╩══╩╩═╝╚═╩═╝╚═╩═╩═╩═╩═╩╝
 
-		You answered 4 to 6 correct questions.
-
-		Do you want to go out or go back to the menu?
-		- Enter "" if you want to go back to the menu.
-		- Enter "" if you want to exit the game.'''
+		You answered 4 to 6 correct questions.'''
 
 		final4 = '''
 		Results:
@@ -141,11 +129,7 @@ class FinalScreen(IScreen):
 		╚══╩═╩═╝╚═╩╩╩═╩═╩═╩═╝║╔╩═╩══╬╗║╚══╩╩═╩═╩═╩╩╩═╩╝─╠╗╠══╩╩╩╩═╝
 		─────────────────────╚╝─────╚═╝─────────────────╚═╝
 
-		You answered 1 to 3 correct questions.
-
-		Do you want to go out or go back to the menu?
-		- Enter "" if you want to go back to the menu.
-		- Enter "" if you want to exit the game.'''
+		You answered 1 to 3 correct questions.'''
 
 		if result == 10:
 			return final1

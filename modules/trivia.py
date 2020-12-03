@@ -34,6 +34,7 @@ class Question:
 class Match:
 	def __init__(self, questions, category, difficulty = Difficulty.medium):
 		self.duration = 0
+		self.index = 0
 		self.player = None
 		self.difficulty = difficulty
 		self.category = category
