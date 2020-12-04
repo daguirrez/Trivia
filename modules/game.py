@@ -7,10 +7,6 @@ from time import time
 
 class Game:
 	def __init__(self):
-		self.__storage = st.MyStorage()
-		self.__players = []
-		self.__categories = []
-		self.__current_player = None
 		self.__gdata = {}
 
 	def __err_message(self):
@@ -24,11 +20,14 @@ class Game:
 		else:
 			os.system("clear")
 
-	def get_initial_data(self):
-		self.__players = self.__storage.load_players()
-		self.__categories = self.__storage.load_categories()
+	def get_initial_data(self, storage):
+		data = {}
+		data["players"] = storage.load_players()
+		data["categories"] = storage.load_categories()
 
-	def title_screen(self):
+		return data
+
+	def title_screen(self, storage, data):
 		g = gr.TitleScreen()
 		player_name = str
 
@@ -45,16 +44,16 @@ class Game:
 				break
 
 		# player exists
-		pex = [p for p in self.__players if p.name == player_name]
+		pex = [p for p in data["players"] if p.name == player_name]
 		if len(pex) > 0:
-			self.__current_player = pex[0]
+			return pex[0]
 		else:
 			# save player
-			if not self.__storage.save_player(tr.Player(player_name, None)):
+			if not storage.save_player(tr.Player(player_name, None)):
 				self.__err_message()
 
-			self.__players = self.__storage.load_players() # loads players again
-			self.__current_player = self.__players[len(self.__players) - 1]
+			data["players"] = storage.load_players() # loads players again
+			return data["players"][len(data["players"]) - 1]
 
 	def menu_screen(self):
 		g = gr.MenuScreen()
@@ -67,16 +66,16 @@ class Game:
 
 			if op in ("1", "2", "3"):
 				# save difficulty
-				if op == "1": self.__gdata["difficulty"] = tr.Difficulty.easy
-				if op == "2": self.__gdata["difficulty"] = tr.Difficulty.medium
-				if op == "3": self.__gdata["difficulty"] = tr.Difficulty.hard
+				if op == "1": return tr.Difficulty.easy
+				if op == "2": return tr.Difficulty.medium
+				if op == "3": return tr.Difficulty.hard
 
-				return "categories"
-			if op == "4":
-				return "stats"
+			return None
 
-	def player_stats_screen(self):
-		g = gr.PlayerStatsScreen(self.__storage.load_player_statistics(self.__current_player))
+	def player_stats_screen(self, storage, player):
+		g = gr.PlayerStatsScreen(
+			storage.load_player_statistics(player)
+		)
 
 		# draw statistics
 		self.__clear_screen()
@@ -84,8 +83,8 @@ class Game:
 		input() # pause program
 
 
-	def categories_screen(self):
-		g = gr.CategoriesScreen(self.__categories)
+	def categories_screen(self, data):
+		g = gr.CategoriesScreen(data["categories"])
 
 		self.__clear_screen()
 		print(g.draw())
@@ -93,20 +92,20 @@ class Game:
 		idc = input()
 
 		# check if exist
-		ex = [c for c in self.__categories if idc == str(c.id)]
-		if len(ex) > 0:		self.__gdata["category"] = ex[0]
-		else:				self.__gdata["category"] = self.__categories[0]
+		ex = [c for c in data["categories"] if idc == str(c.id)]
+		if len(ex) > 0:		return ex[0]
+		else:				return data["categories"][0]
 
-	def game_screen(self):
+	def game_screen(self, category, difficulty, player):
 		# make a match
 		t = pa.TriviaParty(
-			category = self.__gdata["category"],
-			difficulty = self.__gdata["difficulty"]
+			category = category,
+			difficulty = difficulty
 		)
 		m = t.get_match() # get match
-		m.player = self.__current_player
+		m.player = player
 
-		self.__gdata["stime"] = time() # get start time
+		stime = time() # get start time
 		
 		g = gr.GameScreen(m)
 
@@ -129,15 +128,14 @@ class Game:
 			# check answer
 			m.questions[k].is_correct = (m.questions[k].answers[answer - 1] == m.questions[k].correct_answer)
 
-		self.__gdata["match"] = m
+		m.duration = int(time() - stime) # set duration
+		return m
 
-	def final_screen(self):
-		m = self.__gdata["match"]
-		g = gr.FinalScreen(m)
+	def final_screen(self, storage, match):
+		g = gr.FinalScreen(match)
 
 		# save match
-		m.duration = int(time() - self.__gdata["stime"])
-		self.__storage.save_match(m)
+		storage.save_match(match)
 
 		# draw
 		self.__clear_screen()
@@ -145,21 +143,23 @@ class Game:
 		input() # "pause screen"
 
 	def init_game(self):
-		self.get_initial_data() # inits game
-		self.title_screen()
+		storage = st.MyStorage()
+
+		gdata = self.get_initial_data(storage) # get data from DB
+		player = self.title_screen(storage, gdata) # get selected player
 		
 		while True:
-			menu_o = self.menu_screen() # start menu
+			difficulty = self.menu_screen() # start menu
 
-			if menu_o == "stats": # see stats
-				self.player_stats_screen()
+			if difficulty == None: # see stats
+				self.player_stats_screen(storage, player)
 				continue
 			
-			self.categories_screen()
-			self.game_screen()
-			self.final_screen()
+			category = self.categories_screen(gdata)
+			fmatch = self.game_screen(category, difficulty, player)
+			self.final_screen(storage, fmatch)
 
-			self.get_initial_data() # reestart data
+			gdata = self.get_initial_data(storage) # reestart data
 
 
 

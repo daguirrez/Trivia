@@ -173,7 +173,7 @@ class MyStorage(IStorage):
 			"""
 			SELECT p.id FROM players p
 			INNER JOIN matches m ON p.id = m.id_player
-			GROUP BY m.score
+			GROUP BY p.id
 			ORDER BY SUM(m.score) DESC
 			"""
 		)
