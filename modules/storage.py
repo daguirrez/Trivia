@@ -25,13 +25,16 @@ class IStorage(metaclass=abc.ABCMeta):
 
 
 class MyStorage(IStorage):
+	def __init__(self, **conn):
+		self.__conn = conn
+
 	def __connect(self):
 		# connect with the database
 		return mysql.connector.connect(
-			host		= "localhost",
-			user		= "root",
-			password	= "",
-			database	= "trivia"
+			host		= self.__conn.get("host",		"localhost"),
+			user		= self.__conn.get("user",		"root"),
+			password	= self.__conn.get("password",	""),
+			database	= self.__conn.get("database",	"trivia")
 		)
 
 	def __close(self, db, cursor):

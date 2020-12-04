@@ -73,14 +73,16 @@ class Game:
 			return None
 
 	def player_stats_screen(self, storage, player):
-		g = gr.PlayerStatsScreen(
-			storage.load_player_statistics(player)
-		)
+		statistics = storage.load_player_statistics(player)
+		
+		g = gr.PlayerStatsScreen(statistics)
 
 		# draw statistics
 		self.__clear_screen()
 		print(g.draw())
 		input() # pause program
+
+		return statistics
 
 
 	def categories_screen(self, data):
@@ -142,8 +144,8 @@ class Game:
 		print(g.draw())	
 		input() # "pause screen"
 
-	def init_game(self):
-		storage = st.MyStorage()
+	def init_game(self, db = "trivia"):
+		storage = st.MyStorage(database = db)
 
 		gdata = self.get_initial_data(storage) # get data from DB
 		player = self.title_screen(storage, gdata) # get selected player
