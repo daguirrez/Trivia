@@ -48,8 +48,10 @@ class MenuScreen(IScreen):
 		currently.
 
 		Menu:
-		Play match (writes 1)
-		View player stats(writes 2)
+		Play easy match (writes 1)
+		Play medium match (writes 2)
+		Play hard match (writes 3)
+		View player stats(writes 4)
 		'''
 
 class PlayerStatsScreen(IScreen):
@@ -57,7 +59,11 @@ class PlayerStatsScreen(IScreen):
 		self.player_stats = player_stats
 	
 	def draw(self):
-		categories = "\n\t\t".join([c.name for c in self.player_stats.best_categories])
+		if self.player_stats == None:
+			return "You don't have statistics"
+
+		k = 0
+		categories = "\n\t\t".join([str(k := k + 1) + ". " + c.name for c in self.player_stats.best_categories])
 
 		return f'''
 		Your stats are:
@@ -92,7 +98,8 @@ class GameScreen(IScreen):
 		self.__match = match
 
 	def draw(self):
-		answers = "\n\t\t".join([a for a in self.__match.questions[self.__match.index].answers])
+		k = 0
+		answers = "\n\t\t".join([str(k := k + 1) + ". " + a for a in self.__match.questions[self.__match.index].answers])
 		
 		return f'''
 		Read the question and select the answer you 

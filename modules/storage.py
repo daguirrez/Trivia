@@ -146,26 +146,13 @@ class MyStorage(IStorage):
 		
 		s = PlayerStatistics()
 
-		s.wins					= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s AND score >= 7", (player.id,), True)
-		s.games_played			= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s", (player.id,), True)
-		s.time_played			= self.__select("SELECT SUM(duration) FROM matches WHERE id_player = %s", (player.id,), True)
-		s.ranking				= self.__select(
-			"""
-			SELECT @rankpos FROM
-			(
-				SELECT @rankpos := 0
-			) AS rk,
-			(
-				SELECT p.id FROM players p
-				INNER JOIN matches m ON p.id = m.id_player
-				ORDER BY m.score DESC
-			) AS p
-			WHERE (@rankpos := @rankpos + 1) AND p.id = %s
-			LIMIT 1
-			""",
-			(player.id,),
-			True
-		) or -1
+		# check if has statistics
+		s.games_played			= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s", (player.id,), True)[0]
+		if s.games_played == 0:
+			return None
+		
+		s.wins					= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s AND score >= 7", (player.id,), True)[0]
+		s.time_played			= self.__select("SELECT SUM(duration) FROM matches WHERE id_player = %s", (player.id,), True)[0]
 		s.best_categories		= self.__select(
 			"""
 			SELECT
@@ -179,6 +166,24 @@ class MyStorage(IStorage):
 			""",
 			(player.id,)
 		)
+
+		# get ranking
+		ranking	= self.__select(
+			"""
+			SELECT p.id FROM players p
+			INNER JOIN matches m ON p.id = m.id_player
+			GROUP BY m.score
+			ORDER BY SUM(m.score) DESC
+			"""
+		)
+
+		ra = 1 # get player ranking
+		for r in ranking:
+			if r[0] == player.id:
+				s.ranking = ra
+				break
+			
+			ra += 1
 
 		# convert categories data into Category objects
 		s.best_categories = [Category(c[1], c[0]) for c in s.best_categories]

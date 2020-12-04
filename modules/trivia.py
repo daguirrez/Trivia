@@ -55,9 +55,9 @@ class Match:
 		return qc
 
 class PlayerStatistics:
-	def __init__(self):
-		self.wins = 0
-		self.games_played = 0
-		self.time_played = 0
-		self.ranking = -1
-		self.best_categories = []
+	def __init__(self, **stats):
+		self.wins				= stats.get("wins", 0)
+		self.games_played		= stats.get("games_played", 0)
+		self.time_played		= stats.get("time_played", 0)
+		self.ranking			= stats.get("ranking", 0)
+		self.best_categories	= stats.get("best_categories", [])

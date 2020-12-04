@@ -51,8 +51,10 @@ class GraphicsTest(unittest.TestCase):
 		currently.
 
 		Menu:
-		Play match (writes 1)
-		View player stats(writes 2)
+		Play easy match (writes 1)
+		Play medium match (writes 2)
+		Play hard match (writes 3)
+		View player stats(writes 4)
 		'''
 
 		instancia = MenuScreen()
@@ -77,10 +79,10 @@ class GraphicsTest(unittest.TestCase):
 		¿esto funcionara?
 
 		Possible answers:
-		si
-		no
-		quiza
-		definitivamente no
+		1. si
+		2. no
+		3. quiza
+		4. definitivamente no
 		'''
 			},
 			{
@@ -103,8 +105,8 @@ class GraphicsTest(unittest.TestCase):
 		¿esto funcionara 2?
 
 		Possible answers:
-		si
-		no
+		1. si
+		2. no
 		'''
 			}
 		]
@@ -268,7 +270,16 @@ class GraphicsTest(unittest.TestCase):
 			self.assertEqual(salida_real, t["salida_esperada"])
 
 	def test_stats_screen(self):
-		ex_output = '''
+		tests = [
+			{
+				"input": PlayerStatistics(
+					wins = 5,
+					games_played = 20,
+					time_played = 56,
+					ranking = 2,
+					best_categories = [Category("Books"), Category("Films")]
+				),
+				"ex_output": '''
 		Your stats are:
 
 		Wins: 5
@@ -277,22 +288,41 @@ class GraphicsTest(unittest.TestCase):
 		Ranking: #2
 		
 		Best categories:
-		Books
-		Films
+		1. Books
+		2. Films
 		'''
+			},
+			{
+				"input": PlayerStatistics(
+					wins = 2,
+					games_played = 20,
+					time_played = 56,
+					ranking = 5,
+					best_categories = []
+				),
+				"ex_output": '''
+		Your stats are:
 
-		ps = PlayerStatistics()
+		Wins: 2
+		Games played: 20
+		Time played: 56s
+		Ranking: #5
+		
+		Best categories:
+		
+		'''
+			},
+			{
+				"input": None,
+				"ex_output": "You don't have statistics"
+			}
+		]
 
-		ps.wins = 5
-		ps.games_played = 20
-		ps.time_played = 56
-		ps.ranking = 2
-		ps.best_categories = [Category("Books"), Category("Films")]
+		for t in tests:
+			title = PlayerStatsScreen(t["input"])
 
-		title = PlayerStatsScreen(ps)
-
-		r_output = title.draw()
-		self.assertEqual(ex_output, r_output)
+			r_output = title.draw()
+			self.assertEqual(t["ex_output"], r_output)
 
 	def test_categories(self):
 		ex_output = '''
