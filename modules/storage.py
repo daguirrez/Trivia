@@ -147,10 +147,11 @@ class MyStorage(IStorage):
 		s = PlayerStatistics()
 
 		# check if has statistics
-		s.games_played			= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s", (player.id,), True)[0]
-		if s.games_played == 0:
+		s.games_played			= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s", (player.id,), True)
+		if s.games_played == None or s.games_played[0] == 0:
 			return None
-		
+
+		s.games_played = s.games_played[0]
 		s.wins					= self.__select("SELECT COUNT(*) FROM matches WHERE id_player = %s AND score >= 7", (player.id,), True)[0]
 		s.time_played			= self.__select("SELECT SUM(duration) FROM matches WHERE id_player = %s", (player.id,), True)[0]
 		s.best_categories		= self.__select(

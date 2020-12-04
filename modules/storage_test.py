@@ -5,10 +5,13 @@ from trivia import *
 from storage import *
 
 class StorageTest(unittest.TestCase):
-	def __patch_all(self, mock, **err_raises):
-		e_connect = err_raises.get("e_connect")
-		e_cursor = err_raises.get("e_cursor")
-		rowcount = err_raises.get("rowcount", 1)
+	def __patch_all(self, mock, **replace):
+		e_connect = replace.get("e_connect")
+		e_cursor = replace.get("e_cursor")
+		rowcount = replace.get("rowcount", 1)
+		fetchone = replace.get("fetchone", (None,))
+		fetchall = replace.get("fetchall", [])
+
 
 		# patch all mysql-connector methods (correct values)
 		mock.return_value = MagicMock(
@@ -18,7 +21,9 @@ class StorageTest(unittest.TestCase):
 				return_value = MagicMock(
 					execute = MagicMock(return_value = None),
 					close = MagicMock(return_value = None),
-					rowcount = rowcount
+					rowcount = rowcount,
+					fetchone = MagicMock(return_value = fetchone),
+					fetchall = MagicMock(return_value = fetchall)
 				)
 			)
 		)
@@ -29,6 +34,24 @@ class StorageTest(unittest.TestCase):
 
 		if e_cursor:
 			mock.return_value.cursor.side_effect = MagicMock(side_effect = e_cursor)
+
+	def __test_load_error(self, mock, test_callback, db_raises_tests = True):
+		if db_raises_tests:
+			tests = [
+				{ "e_cursor": mysql.connector.Error() },
+				{ "e_connect": mysql.connector.Error() }
+			]
+		else:
+			tests = [{}]
+
+		for t in tests:
+			self.__patch_all(mock, **t)
+			storage = MyStorage()
+
+			test_callback( # call the callback for testing
+				storage,
+				t
+			)
 
 	def __test_save_error(self, method_name, param, mock, db_raises_tests = True):
 		if db_raises_tests:
@@ -91,6 +114,43 @@ class StorageTest(unittest.TestCase):
 	@patch("mysql.connector.connect")
 	def test_save_match_without_player(self, mock):
 		self.__test_save_error("save_match", Match([], Category("", 1)), mock, False)
+
+	@patch("mysql.connector.connect")
+	def test_load_players_raises(self, mock):
+		def test(storage, test):
+			output = storage.load_players()
+			self.assertCountEqual(output, [])
+		
+		self.__test_load_error(
+			mock,
+			test,
+			True
+		)
+
+	@patch("mysql.connector.connect")
+	def test_load_categories_raises(self, mock):
+		def test(storage, test):
+			output = storage.load_categories()
+			self.assertCountEqual(output, [])
+		
+		self.__test_load_error(
+			mock,
+			test,
+			True
+		)
+
+	@patch("mysql.connector.connect")
+	def test_load_player_statistics(self, mock):
+		def test(storage, test):
+			output = storage.load_player_statistics(Player(""))
+			self.assertIsNone(output)
+		
+		self.__test_load_error(
+			mock,
+			test,
+			True
+		)
+		
 
 if __name__ == "__main__":
 	unittest.main()
