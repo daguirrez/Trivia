@@ -1,6 +1,5 @@
 import abc
-from trivia import Category, Match
-from storage import MyStorage
+from trivia import Category, Match, PlayerStatistics
 
 class IScreen(metaclass=abc.ABCMeta):
 	@abc.abstractmethod
@@ -37,70 +36,81 @@ class TitleScreen(IScreen):
 		─────██████─────██████████─██████──────────██████─██████████████─██████─
 		────────────────────────────────────────────────────────────────────────
 		
-		Enter your player name in three letters:'''
+		Enter your player name in three letters:
+		'''
 		return title
 
 class MenuScreen(IScreen):
 	def draw(self):
-		menu = '''
+		return '''
 		In this game you will be able to experience a 
 		trivia of some of the most interesting topics
 		currently.
 
 		Menu:
 		Play match (writes 1)
-		View player stats(writes 2)'''
-		return menu
+		View player stats(writes 2)
+		'''
 
 class PlayerStatsScreen(IScreen):
-	def __init__(self, player, mystorage):
-		self.__player = player
-		self.__mystorage = mystorage
+	def __init__(self, player_stats):
+		self.player_stats = player_stats
 	
 	def draw(self):
-		stats = f'''
-		Yout stats are:
+		categories = "\n\t\t".join([c.name for c in self.player_stats.best_categories])
 
-		{self.__mystorage.load_player_statistics(self.__player)}''' 
-		return stats
+		return f'''
+		Your stats are:
+
+		Wins: {self.player_stats.wins}
+		Games played: {self.player_stats.games_played}
+		Time played: {self.player_stats.time_played}s
+		Ranking: #{self.player_stats.ranking}
+		
+		Best categories:
+		{categories}
+		'''
 
 class CategoriesScreen(IScreen):
-	def __init__(self, category):
-		self.__category = category
+	def __init__(self, categories):
+		self.__categories = categories
 
 	def draw(self):
-		categoriesstr = '''
+		categories = "\n\t\t".join([(q.name + " writes " + str(q.id)) for q in self.__categories])
+
+		return f'''
 		Select the category of your trivia. if you 
 		don't select any of the default category is 
 		Anime & Manga. (Introduce the id)
 
 		Categories:
-
-		{for q in self.__category:
-			q.name + " writes " + q.__id}'''
-		return categoriesstr
-
+		{categories}
+		'''
 
 class GameScreen(IScreen):
 	def __init__(self, match):
 		self.__match = match
 
 	def draw(self):
-		qa = f'''
+		answers = "\n\t\t".join([a for a in self.__match.questions[self.__match.index].answers])
+		
+		return f'''
 		Read the question and select the answer you 
 		think is right.
 
-		Question: {self.__match.questions[self.__match.index].get_question()}
-					
+		Question:
+		{self.__match.questions[self.__match.index].question}
+
 		Possible answers:
-		{self.__match.questions[self.__match.index].get_answers()}'''
-		return qa
+		{answers}
+		'''
 
 class FinalScreen(IScreen):
 	def __init__(self, match):
 		self.__match = match
 
 	def draw(self):
+		# get result
 		result = len([q for q in self.__match.questions if q.is_correct])
 		
 		final1 = '''
@@ -155,3 +165,4 @@ class FinalScreen(IScreen):
 			return final3
 		
 		return final4
+

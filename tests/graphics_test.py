@@ -5,6 +5,7 @@ from unittest.mock import Mock, MagicMock, patch
 sys.path.append("../modules")
 
 from graphics import *
+from trivia import *
 
 class GraphicsTest(unittest.TestCase):
 	def test_titlescreen(self):
@@ -36,7 +37,9 @@ class GraphicsTest(unittest.TestCase):
 		─────██████─────██████████─██████──────────██████─██████████████─██████─
 		────────────────────────────────────────────────────────────────────────
 		
-		Enter your player name in three letters:'''
+		Enter your player name in three letters:
+		'''
+
 		instancia = TitleScreen()
 		salida_real = instancia.draw()
 		self.assertEqual(salida_esperada, salida_real)
@@ -49,48 +52,75 @@ class GraphicsTest(unittest.TestCase):
 
 		Menu:
 		Play match (writes 1)
-		View player stats(writes 2)'''
+		View player stats(writes 2)
+		'''
+
 		instancia = MenuScreen()
 		salida_real = instancia.draw()
 		self.assertEqual(salida_esperada, salida_real)
 
-	#no complete la función así que tampoco pude hacer el test
-	#def test_categoriesscreen(self):
-
-	#si funciona, pero la función regresa el objeto no un string 
 	def test_gamescreen(self):
-		test_cases = (
-            {
+		test_cases = [
+			{
 				"index": 0,
-                "question": ["¿esto funcionara?"],
-				"answers": ["si", "no", "quiza", "definitivamente no"],
-                "salida_esperada": '''
+				"questions": [
+					Question(
+						question = "¿esto funcionara?",
+						answers = ["si", "no", "quiza", "definitivamente no"]
+					)
+				],
+				"salida_esperada": '''
 		Read the question and select the answer you 
 		think is right.
 
-		Question: ¿esto funcionara?
-					
-		Possible answers:
-		["si", "no", "quiza", "definitivamente no"]''',
-            },
-        )
+		Question:
+		¿esto funcionara?
 
-		for cp in test_cases:
-			mock_match = MagicMock()
-			mock_match.return_value = MagicMock()
-			mock_match.return_value.index = cp["index"]
-			mock_match.return_value.question = cp["question"]
-			mock_match.return_value.answers = cp["answers"]
-			
-			instancia = GameScreen(mock_match)
+		Possible answers:
+		si
+		no
+		quiza
+		definitivamente no
+		'''
+			},
+			{
+				"index": 1,
+				"questions": [
+					Question(
+						question = "¿esto funcionara?",
+						answers = ["si", "no", "quiza", "definitivamente no"]
+					),
+					Question(
+						question = "¿esto funcionara 2?",
+						answers = ["si", "no"]
+					)
+				],
+				"salida_esperada": '''
+		Read the question and select the answer you 
+		think is right.
+
+		Question:
+		¿esto funcionara 2?
+
+		Possible answers:
+		si
+		no
+		'''
+			}
+		]
+
+		for t in test_cases:
+			m = Match(t["questions"], None)
+			m.index = t["index"]
+
+			instancia = GameScreen(m)
 			salida_real = instancia.draw()
-			self.assertEqual(salida_real, cp["salida_esperada"])
+			self.assertEqual(salida_real, t["salida_esperada"])
 	
 	def test_finalscreen(self):
 		test_cases = (
 			{
-				"resultscorrect": [],
-				"lenresult": 0,
+				"questions": [Question(is_correct = False)],
 				"salida_esperada": '''
 		Results:
 
@@ -103,8 +133,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 1 to 3 correct questions.''',
 			},
 			{
-				"resultscorrect": [True],
-				"lenresult": 1,
+				"questions": [Question(is_correct = True), Question(is_correct = False)],
 				"salida_esperada": '''
 		Results:
 
@@ -117,8 +146,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 1 to 3 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True],
-				"lenresult": 2,
+				"questions": [Question(is_correct = True)] * 2,
 				"salida_esperada": '''
 		Results:
 
@@ -131,8 +159,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 1 to 3 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True],
-				"lenresult": 3,
+				"questions": [Question(is_correct = True)] * 3,
 				"salida_esperada": '''
 		Results:
 
@@ -145,8 +172,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 1 to 3 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True],
-				"lenresult": 4,
+				"questions": [Question(is_correct = True)] * 4,
 				"salida_esperada": '''
 		Results:
 
@@ -158,8 +184,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 4 to 6 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True],
-				"lenresult": 5,
+				"questions": [Question(is_correct = True)] * 5,
 				"salida_esperada": '''
 		Results:
 
@@ -171,8 +196,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 4 to 6 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True, True],
-				"lenresult": 6,
+				"questions": [Question(is_correct = True)] * 6,
 				"salida_esperada": '''
 		Results:
 
@@ -184,8 +208,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 4 to 6 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True, True, True],
-				"lenresult": 7,
+				"questions": [Question(is_correct = True)] * 7,
 				"salida_esperada": '''
 		Results:
 
@@ -198,8 +221,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 7 to 9 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True, True, True, True],
-				"lenresult": 8,
+				"questions": [Question(is_correct = True)] * 8,
 				"salida_esperada": '''
 		Results:
 
@@ -212,8 +234,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 7 to 9 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True, True, True, True, True],
-				"lenresult": 9,
+				"questions": [Question(is_correct = True)] * 9,
 				"salida_esperada": '''
 		Results:
 
@@ -226,8 +247,7 @@ class GraphicsTest(unittest.TestCase):
 		You answered 7 to 9 correct questions.''',
 			},
 			{
-				"resultscorrect": [True, True, True, True, True, True, True, True, True, True],
-				"lenresult": 10,
+				"questions": [Question(is_correct = True)] * 10,
 				"salida_esperada": '''
 		Results:
 
@@ -240,15 +260,60 @@ class GraphicsTest(unittest.TestCase):
 			},
 		)
 
-		for cp in test_cases:
-			mock_match = MagicMock()
-			mock_match.return_value = MagicMock()
-			mock_match.return_value.questions = MagicMock()
-			mock_match.return_value.questions.is_correct = cp["resultscorrect"]
+		for t in test_cases:
+			m = Match(t["questions"], None)
+			instance = FinalScreen(m)
 
-			instancia = FinalScreen(mock_match)
-			salida_real = instancia.draw()
-			self.assertEqual(salida_real, cp["salida_esperada"])
+			salida_real = instance.draw()
+			self.assertEqual(salida_real, t["salida_esperada"])
+
+	def test_stats_screen(self):
+		ex_output = '''
+		Your stats are:
+
+		Wins: 5
+		Games played: 20
+		Time played: 56s
+		Ranking: #2
+		
+		Best categories:
+		Books
+		Films
+		'''
+
+		ps = PlayerStatistics()
+
+		ps.wins = 5
+		ps.games_played = 20
+		ps.time_played = 56
+		ps.ranking = 2
+		ps.best_categories = [Category("Books"), Category("Films")]
+
+		title = PlayerStatsScreen(ps)
+
+		r_output = title.draw()
+		self.assertEqual(ex_output, r_output)
+
+	def test_categories(self):
+		ex_output = '''
+		Select the category of your trivia. if you 
+		don't select any of the default category is 
+		Anime & Manga. (Introduce the id)
+
+		Categories:
+		Books writes 1
+		Films writes 2
+		Games writes 3
+		'''
+
+		title = CategoriesScreen([
+			Category("Books", 1),
+			Category("Films", 2),
+			Category("Games", 3)
+		])
+
+		r_output = title.draw()
+		self.assertEqual(ex_output, r_output)
 
 if __name__ == '__main__':
     unittest.main()
