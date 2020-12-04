@@ -7,6 +7,6 @@ install:
 # command to run tests
 script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
-  - python tests/graphics_test.py
-  - python tests/party_test.py
-  - python tests/storage_test.py
+  - python modules/graphics_test.py
+  - python modules/party_test.py
+  - python modules/storage_test.py

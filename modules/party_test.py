@@ -1,13 +1,9 @@
-import sys
 import unittest
 import json
 import base64
 from urllib.parse import unquote
 from unittest.mock import Mock, MagicMock, patch
 from requests import exceptions as rex
-
-sys.path.append("../modules")
-
 import party as pty
 from trivia import Category, Difficulty, Match
 

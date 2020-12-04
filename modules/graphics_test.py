@@ -1,9 +1,5 @@
-import sys
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-
-sys.path.append("../modules")
-
 from graphics import *
 from trivia import *
 

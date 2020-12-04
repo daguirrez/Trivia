@@ -1,10 +1,6 @@
-import sys
 import unittest
 import mysql.connector
 from unittest.mock import Mock, MagicMock, patch
-
-sys.path.append("../modules")
-
 from trivia import *
 from storage import *
 
