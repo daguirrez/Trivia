@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.8"
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+# command to run tests
+script:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+  - python tests/graphics_test.py
+  - python tests/party_test.py
+  - python tests/storage_test.py
